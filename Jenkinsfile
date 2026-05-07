@@ -45,7 +45,7 @@ pipeline {
 
     stage('Run Cucumber Tests') {
       steps {
-        bat '''
+        sh '''
           echo "Running with tags: ${params.CUCUMBER_TAGS}"
           echo "Using env file: ${env.DOTENV_CONFIG_PATH}"
           echo "Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}"
