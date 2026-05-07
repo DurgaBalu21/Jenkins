@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cucumber-js",
-    "test:smoke": "cucumber-js --tags @smoke"
+    "test": "cucumber-js --tags @smoke",
+    
   },
   "keywords": [],
   "author": "",
