@@ -27,7 +27,7 @@ pipeline {
 
     stage('Node & Install Deps') {
       steps {
-        bat '''
+        sh '''
           node -v
           npm -v
           npm ci
@@ -37,7 +37,7 @@ pipeline {
 
     stage('Install Playwright Browsers') {
       steps {
-        bat '''
+        sh '''
           npx playwright install --with-deps
         '''
       }
