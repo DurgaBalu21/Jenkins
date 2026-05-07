@@ -27,7 +27,7 @@ pipeline {
 
     stage('Node & Install Deps') {
       steps {
-        sh '''
+        bat '''
           node -v
           npm -v
           npm ci
@@ -37,7 +37,7 @@ pipeline {
 
     stage('Install Playwright Browsers') {
       steps {
-        sh '''
+        bat '''
           npx playwright install --with-deps
         '''
       }
@@ -45,7 +45,7 @@ pipeline {
 
     stage('Run Cucumber Tests') {
       steps {
-        sh '''
+        bat """
           echo "Running with tags: ${params.CUCUMBER_TAGS}"
           echo "Using env file: ${env.DOTENV_CONFIG_PATH}"
           echo "Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}"
@@ -57,7 +57,7 @@ pipeline {
 
          
           npm run test:cucumber -- --tags "${params.CUCUMBER_TAGS}"
-        '''
+        """
       }
     }
   }
