@@ -51,9 +51,9 @@ pipeline {
           echo "Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}"
 
           
-          export BROWSER=${params.BROWSER}
-          export HEADLESS=${params.HEADLESS}
-          export CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
+          set BROWSER=${params.BROWSER}
+          set HEADLESS=${params.HEADLESS}
+          set CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
 
          
           npm run test:cucumber -- --tags "${params.CUCUMBER_TAGS}"
