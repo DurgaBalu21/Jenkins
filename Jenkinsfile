@@ -52,7 +52,7 @@ pipeline {
           echo Using env file: ${env.DOTENV_CONFIG_PATH}
           echo Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}
 
-          npm run test:cucumber -- --tags ${params.CUCUMBER_TAGS} --browser ${params.BROWSER} --headless ${params.HEADLESS}
+          npm run test:cucumber -- --tags ${params.CUCUMBER_TAGS}
         """
       }
     }
