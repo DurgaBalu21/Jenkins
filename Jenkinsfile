@@ -54,10 +54,10 @@ pipeline {
           set BROWSER=${params.BROWSER}
           set HEADLESS=${params.HEADLESS}
           set CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
-
-         
+          """
+         sh '''
           npm run test:cucumber --tags "${params.CUCUMBER_TAGS}"
-        """
+        '''
       }
     }
   }
