@@ -70,9 +70,9 @@ pipeline {
         allowMissing: true,
         alwaysLinkToLastBuild: true,
         keepAll: true,
-        reportDir: 'cucumber-report',
+        reportDir: 'playwright-report',
         reportFiles: 'index.html',
-        reportName: 'Cucumber HTML Report'
+        reportName: 'Playwright HTML Report'
       ])
     }
   }
