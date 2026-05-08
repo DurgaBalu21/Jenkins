@@ -1,8 +1,6 @@
 pipeline {
   agent any
 
- 
-
   parameters {
     string(name: 'CUCUMBER_TAGS', defaultValue: '@smoke', description: 'Cucumber tag expression (e.g. @smoke or @smoke and not @wip)')
     choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Playwright browser')
@@ -11,13 +9,9 @@ pipeline {
   }
 
   environment {
-    // Speeds up installs
     CI = "true"
     NPM_CONFIG_FUND = "false"
     NPM_CONFIG_AUDIT = "false"
-
-    // If you use .env files like .env.qa, .env.stage...
-    DOTENV_CONFIG_PATH = ".env.${params.ENV}"
   }
 
   stages {
@@ -38,39 +32,40 @@ pipeline {
     stage('Install Playwright Browsers') {
       steps {
         bat '''
-          npx playwright install --with-deps
+          npx playwright install
         '''
+      }
+    }
+
+    stage('Set Env Path') {
+      steps {
+        script {
+          env.DOTENV_CONFIG_PATH = ".env.${params.ENV}"
+        }
       }
     }
 
     stage('Run Cucumber Tests') {
       steps {
         bat """
-          echo "Running with tags: ${params.CUCUMBER_TAGS}"
-          echo "Using env file: ${env.DOTENV_CONFIG_PATH}"
-          echo "Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}"
+          echo Running with tags: ${params.CUCUMBER_TAGS}
+          echo Using env file: %DOTENV_CONFIG_PATH%
+          echo Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}
 
-          
           set BROWSER=${params.BROWSER}
           set HEADLESS=${params.HEADLESS}
-          set CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
-          """
-         sh '''
-          npm run test:cucumber --tags "${params.CUCUMBER_TAGS}"
-        '''
+          set CUCUMBER_TAGS=${params.CUCUMBER_TAGS}
+
+          npm run test:cucumber -- --tags %CUCUMBER_TAGS%
+        """
       }
     }
   }
 
   post {
     always {
-      // Archive reports if you generate them
       archiveArtifacts artifacts: 'reports/**/*, cucumber-report/**/*, test-results/**/*, playwright-report/**/*', allowEmptyArchive: true
-
-      // Optional JUnit publish (only if you generate junit xml)
       junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
-
-      // Optional: publish HTML report (needs "HTML Publisher" plugin)
       publishHTML(target: [
         allowMissing: true,
         alwaysLinkToLastBuild: true,
@@ -81,5 +76,4 @@ pipeline {
       ])
     }
   }
-  
 }
