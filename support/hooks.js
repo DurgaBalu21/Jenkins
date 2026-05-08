@@ -14,8 +14,8 @@ Before(async function () {
   this.page = await this.context.newPage();
 
   // Create reusable POM objects here (so steps can directly use)
-  this.loginPage = new LoginPage(this.page, { timeout: config.timeout });
-  this.productsPage = new ProductsPage(this.page, { timeout: config.timeout });
+  this.loginPage = await new LoginPage(this.page, { timeout: config.timeout });
+  this.productsPage = await new ProductsPage(this.page, { timeout: config.timeout });
 
   // Open base url (optional)
   await this.page.goto(config.baseUrl, { waitUntil: "domcontentloaded" });
