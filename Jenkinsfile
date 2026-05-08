@@ -50,12 +50,12 @@ pipeline {
           echo "Using env file: ${env.DOTENV_CONFIG_PATH}"
           echo "Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}"
 
-          # Export for your hooks/config to read
+         
           set BROWSER=${params.BROWSER}
           set HEADLESS=${params.HEADLESS}
           set CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
 
-          # If you use dotenv-cli or dotenv package, it will load DOTENV_CONFIG_PATH
+       
           npm run test:cucumber -- --tags "${params.CUCUMBER_TAGS}"
         """
       }
