@@ -1,6 +1,12 @@
 pipeline {
   agent any
 
+  options {
+    timestamps()
+    ansiColor('xterm')
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
   parameters {
     string(name: 'CUCUMBER_TAGS', defaultValue: '@smoke', description: 'Cucumber tag expression (e.g. @smoke or @smoke and not @wip)')
     choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit'], description: 'Playwright browser')
@@ -9,9 +15,13 @@ pipeline {
   }
 
   environment {
+    // Speeds up installs
     CI = "true"
     NPM_CONFIG_FUND = "false"
     NPM_CONFIG_AUDIT = "false"
+
+    // If you use .env files like .env.qa, .env.stage...
+    DOTENV_CONFIG_PATH = ".env.${params.ENV}"
   }
 
   stages {
@@ -31,28 +41,26 @@ pipeline {
 
     stage('Install Playwright Browsers') {
       steps {
-        bat """
-          npx playwright install ${params.BROWSER}
-        """
-      }
-    }
-
-    stage('Set Env Path') {
-      steps {
-        script {
-          env.DOTENV_CONFIG_PATH = ".env.${params.ENV}"
-        }
+        bat '''
+          npx playwright install --with-deps
+        '''
       }
     }
 
     stage('Run Cucumber Tests') {
       steps {
         bat """
-          echo Running with tags: ${params.CUCUMBER_TAGS}
-          echo Using env file: ${env.DOTENV_CONFIG_PATH}
-          echo Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}
+          echo "Running with tags: ${params.CUCUMBER_TAGS}"
+          echo "Using env file: ${env.DOTENV_CONFIG_PATH}"
+          echo "Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}"
 
-          npm run test:cucumber -- --tags ${params.CUCUMBER_TAGS}
+          # Export for your hooks/config to read
+          set BROWSER=${params.BROWSER}
+          set HEADLESS=${params.HEADLESS}
+          set CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
+
+          # If you use dotenv-cli or dotenv package, it will load DOTENV_CONFIG_PATH
+          npm run test:cucumber -- --tags "${params.CUCUMBER_TAGS}"
         """
       }
     }
@@ -60,16 +68,22 @@ pipeline {
 
   post {
     always {
-      archiveArtifacts artifacts: 'reports/**/* cucumber-report/**/* test-results/**/* playwright-report/**/*', allowEmptyArchive: true
+      // Archive reports if you generate them
+      archiveArtifacts artifacts: 'reports/**/*, cucumber-report/**/*, test-results/**/*, playwright-report/**/*', allowEmptyArchive: true
+
+      // Optional JUnit publish (only if you generate junit xml)
       junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
+
+      // Optional: publish HTML report (needs "HTML Publisher" plugin)
       publishHTML(target: [
-          allowMissing: true,
-          alwaysLinkToLastBuild: true,
-          keepAll: true,
-          reportDir: 'playwright-report',
-          reportFiles: 'index.html',
-          reportName: 'Playwright HTML Report'
+        allowMissing: true,
+        alwaysLinkToLastBuild: true,
+        keepAll: true,
+        reportDir: 'cucumber-report',
+        reportFiles: 'index.html',
+        reportName: 'Cucumber HTML Report'
       ])
     }
   }
+  
 }
