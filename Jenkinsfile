@@ -31,9 +31,9 @@ pipeline {
 
     stage('Install Playwright Browsers') {
       steps {
-        bat '''
-          npx playwright install
-        '''
+        bat """
+          npx playwright install ${params.BROWSER}
+        """
       }
     }
 
@@ -49,14 +49,10 @@ pipeline {
       steps {
         bat """
           echo Running with tags: ${params.CUCUMBER_TAGS}
-          echo Using env file: %DOTENV_CONFIG_PATH%
+          echo Using env file: ${env.DOTENV_CONFIG_PATH}
           echo Browser: ${params.BROWSER}, Headless: ${params.HEADLESS}
 
-          set BROWSER=${params.BROWSER}
-          set HEADLESS=${params.HEADLESS}
-          set CUCUMBER_TAGS=${params.CUCUMBER_TAGS}
-
-          npm run test:cucumber -- --tags %CUCUMBER_TAGS%
+          npm run test:cucumber -- --tags ${params.CUCUMBER_TAGS} --browser ${params.BROWSER} --headless ${params.HEADLESS}
         """
       }
     }
@@ -64,15 +60,16 @@ pipeline {
 
   post {
     always {
-        archiveArtifacts artifacts: 'reports/**/*, cucumber-report/**/*, test-results/**/*, playwright-report/**/*', allowEmptyArchive: true
-        junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
-        publishHTML(target: [
-            allowMissing: true,
-            alwaysLinkToLastBuild: true,
-            keepAll: true,
-            reportDir: 'playwright-report',
-            reportFiles: 'index.html',
-            reportName: 'Playwright HTML Report'
-        ])
+      archiveArtifacts artifacts: 'reports/**/* cucumber-report/**/* test-results/**/* playwright-report/**/*', allowEmptyArchive: true
+      junit testResults: 'test-results/**/*.xml', allowEmptyResults: true
+      publishHTML(target: [
+          allowMissing: true,
+          alwaysLinkToLastBuild: true,
+          keepAll: true,
+          reportDir: 'playwright-report',
+          reportFiles: 'index.html',
+          reportName: 'Playwright HTML Report'
+      ])
     }
+  }
 }
