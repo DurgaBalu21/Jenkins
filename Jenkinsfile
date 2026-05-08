@@ -56,7 +56,7 @@ pipeline {
           set CUCUMBER_TAGS="${params.CUCUMBER_TAGS}"
 
          
-          npm run test:cucumber -- --tags "${params.CUCUMBER_TAGS}"
+          npm run test:cucumber --tags "${params.CUCUMBER_TAGS}"
         """
       }
     }
